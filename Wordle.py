@@ -51,11 +51,14 @@ def main():
             a = str(line.rstrip()).split(',')
             freq[a[0].lower()] = float(a[1])
 
+    options = []
+    with open("words.csv") as file:
+        for line in file.readlines():
+            options.append(line.rstrip())
+
     # these are all pretty good starting words and we pick one at random to keep things fresh
-    guess = np.random.choice(['adieu', 'later', 'irate', 'arise', 'store'], 1)[0]
-    guess = 'store'
+    guess = np.random.choice(['salet', 'reast', 'crate', 'trace'], 1)[0]
     print("Guess 1:", guess)
-    options = [x for x in english_words_lower_alpha_set if len(x) == 5]
 
     wrong = set()
     close = defaultdict(list)
