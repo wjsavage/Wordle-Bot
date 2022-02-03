@@ -1,10 +1,10 @@
-from english_words import english_words_lower_alpha_set
+from typing import Dict, List, Set
 from collections import defaultdict
 import numpy as np
 import re
 
 
-def get_feedback(wrong, close, correct, guess):
+def get_feedback(wrong: Set[str], misplaced: Dict[int, List[str]], correct: Dict[int, str], guess: str) -> None:
     feedback = ''
     while not re.match(r"[012]{5}", feedback):
         feedback = input('Feedback: ')
@@ -12,19 +12,20 @@ def get_feedback(wrong, close, correct, guess):
     for i, v in enumerate(feedback):
         v = int(v)
         if v == 0:
-            if not guess[i] in ''.join([y for x in close.values() for y in x]):
+            if not guess[i] in ''.join([y for x in misplaced.values() for y in x]):
                 wrong.add(guess[i])
         elif v == 1:
-            close[i].append(guess[i])
+            misplaced[i].append(guess[i])
         else:
             correct[i] = guess[i]
 
 
-def filter_options(options, wrong, misplaced, knowns):
+def filter_options(options: List[str], wrong: Set[str], misplaced: Dict[int, List[str]], correct: Dict[int, str])\
+        -> List[str]:
     regex = ""
     for i in range(5):
-        if i in knowns.keys():
-            regex += knowns[i]
+        if i in correct.keys():
+            regex += correct[i]
         else:
             regex += '[^' + ''.join(wrong)
             if i in misplaced.keys():
@@ -37,7 +38,7 @@ def filter_options(options, wrong, misplaced, knowns):
     return f
 
 
-def score_word(word, freq):
+def score_word(word: str, freq: Dict[str, float]) -> int:
     try:
         return sum([freq[x] for x in word])
     except KeyError:
@@ -61,17 +62,17 @@ def main():
     print("Guess 1:", guess)
 
     wrong = set()
-    close = defaultdict(list)
+    misplaced = defaultdict(list)
     correct = {}
 
     for g in range(5):
         print('-'*20)
-        get_feedback(wrong, close, correct, guess)
+        get_feedback(wrong, misplaced, correct, guess)
         if len(correct.keys()) == 5:
             print("Congrats, Wordle cracked!")
             break
 
-        options = filter_options(options, wrong, close, correct)
+        options = filter_options(options, wrong, misplaced, correct)
         options.sort(key=lambda x: score_word(x, freq), reverse=True)
         print(options)
         valid = False
